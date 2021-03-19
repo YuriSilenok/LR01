@@ -129,15 +129,9 @@ namespace LR01
                 {
                     int xi = frequencies[i];
                     int xi1 = frequencies[i + 1];
-                    if (xi > xi1)
-                    {
-                        int tmp = xi;
-                        xi = xi1;
-                        xi1 = tmp;
-                    }
                     double Pxi = 1 - Math.Exp(-lambda * xi);
                     double Pxi1 = 1 - Math.Exp(-lambda * xi1);
-                    result[i] = Pxi1 - Pxi;
+                    result[i] = Math.Abs(Pxi1 - Pxi);
                 }
                 return result;
             }
