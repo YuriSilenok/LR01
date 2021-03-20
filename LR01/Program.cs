@@ -41,6 +41,37 @@ namespace LR01
             }
             Console.WriteLine("{0}\n", string.Join(" ", array));
         }
+
+        public static void PrintChart(double[] array)
+        {
+            int x = Console.CursorLeft;
+            int y = Console.CursorTop;
+            double max = array.Max();
+            int pow = 0;
+            while(max < 10)
+            {
+                pow++;
+                max *= 10;
+            }
+            while (max > 100)
+            {
+                pow--;
+                max /= 10;
+            }
+            pow++;
+            for (int i = 0; i < array.Length; i++)
+            {
+                for (int j = 0; j < 10; j++)
+                {
+                    Console.CursorLeft = x + i;
+                    Console.CursorTop = y + 9 - j;
+                    int yi = (int)(array[i] * Math.Pow(10, pow) / max);
+                    Console.Write(yi > j ? '+' : ' ');
+                }
+            }
+            Console.CursorLeft = 0;
+            Console.CursorTop = y + 10;
+        }
     }
 
     public class MyMath
@@ -121,17 +152,17 @@ namespace LR01
                 return true;
             }
 
-            public static double[] ProbabilityDistribution(int[] frequencies, double lambda)
+            public static double[] ProbabilityDistribution(int[] frequencies, double lambda, double intervalWidth)
             {
                 double[] result = new double[frequencies.Length - 1];
                 double znam_temp = frequencies[frequencies.Length - 1] - frequencies[0];
                 for (int i = 0; i < result.Length; i++)
                 {
-                    int xi = frequencies[i];
-                    int xi1 = frequencies[i + 1];
+                    double xi = intervalWidth * i;
+                    double xi1 = xi + intervalWidth;
                     double Pxi = 1 - Math.Exp(-lambda * xi);
                     double Pxi1 = 1 - Math.Exp(-lambda * xi1);
-                    result[i] = Math.Abs(Pxi1 - Pxi);
+                    result[i] = Pxi1 - Pxi;
                 }
                 return result;
             }
@@ -171,8 +202,9 @@ namespace LR01
             double lambda = 1 / Xb;
             Console.WriteLine("Лябда: {0}", lambda);
             //4. Распределение вероятностей
-            double[] P = MyMath.MyArray.ProbabilityDistribution(frequencies, lambda);
+            double[] P = MyMath.MyArray.ProbabilityDistribution(frequencies, lambda, intervalWidth);
             MyConsole.PrintArray(P, "Распределение вероятностей");
+            MyConsole.PrintChart(P);//вывод графика
 
 
             /*
