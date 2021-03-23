@@ -32,7 +32,7 @@ namespace LR01
             Console.WriteLine("{0}\n", string.Join("\n", array));
         }
 
-        public static void PrintArray(int[] array, string mess="")
+        public static void PrintArray(int[] array, string mess = "")
         {
             if (mess != string.Empty)
             {
@@ -42,13 +42,23 @@ namespace LR01
             Console.WriteLine("{0}\n", string.Join(" ", array));
         }
 
+        public static void PrintChart(int[] array)
+        {
+            double[] result = new double[array.Length];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = array[i];
+            }
+            PrintChart(result);
+        }
+
         public static void PrintChart(double[] array)
         {
             int x = Console.CursorLeft;
             int y = Console.CursorTop;
             double max = array.Max();
             int pow = 0;
-            while(max < 10)
+            while (max < 10)
             {
                 pow++;
                 max *= 10;
@@ -152,10 +162,20 @@ namespace LR01
                 return true;
             }
 
+
+            public static int[] TheoreticalFrequencies(double[] P, int N)
+            {
+                int[] result = new int[P.Length];
+                for (int i = 0; i < result.Length; i++)
+                {
+                    result[i] = (int)(P[i] * N + 0.5);
+                }
+                return result;
+            }
+
             public static double[] ProbabilityDistribution(int[] frequencies, double lambda, double intervalWidth)
             {
-                double[] result = new double[frequencies.Length - 1];
-                double znam_temp = frequencies[frequencies.Length - 1] - frequencies[0];
+                double[] result = new double[frequencies.Length];
                 for (int i = 0; i < result.Length; i++)
                 {
                     double xi = intervalWidth * i;
@@ -179,6 +199,16 @@ namespace LR01
             }
             return summ / N;
         }
+
+        public static double PearsonsCriterion(int[] xY, int[] xT)
+        {
+            double result = 0;
+            for (int i = 0; i < xY.Length; i++)
+            {
+                result += Math.Pow(xY[i] - xT[i], 2) / xT[i];
+            }
+            return result;
+        }
     }
 
     class Program
@@ -194,6 +224,7 @@ namespace LR01
             double intervalWidth;
             int[] frequencies = MyMath.MyArray.SplitInterval(failureTimeOx, out intervalWidth);
             MyConsole.PrintArray(frequencies, "Частоты");
+            MyConsole.PrintChart(frequencies);
             Console.WriteLine("Длинна интервала: {0}", intervalWidth);
             //2. выборочная средняя
             double Xb = MyMath.Xb(frequencies, intervalWidth, N);
@@ -205,78 +236,20 @@ namespace LR01
             double[] P = MyMath.MyArray.ProbabilityDistribution(frequencies, lambda, intervalWidth);
             MyConsole.PrintArray(P, "Распределение вероятностей");
             MyConsole.PrintChart(P);//вывод графика
-
-
-            /*
-           
-
-            //Третий пункт
-            double[] P = new double[intervali.Length - 1];
-            double znam_temp = intervali[intervali.Length - 1] - intervali[0];
-            for (int i = 0; i < P.Length; i++)
-            {
-                P[i] = Math.Exp(-lambda * (intervali[i])) - Math.Exp(-lambda * intervali[i + 1]);
-            }
-
-            //Четвертый пункт
-            double[] nT = new double[P.Length];
-            for (int i = 0; i < nT.Length; i++)
-            {
-                nT[i] = exp * P[i];
-            }
-
-            //Пятый пункт
-            int[] nE = GetArrayOfAmountOfExperiments(experiments_new, intervali);
-            double Xi = 0;
-            for (int i = 0; i < nE.Length; i++)
-            {
-                Xi += Math.Pow(nE[i] - nT[i], 2) / nT[i];
-            }
-
-            int K = P.Length;
-            double s = 1;
-            double V = K - (s + 1);
-
+            //5. Теоретические частоты
+            int[] nT = MyMath.MyArray.TheoreticalFrequencies(P, N);
+            MyConsole.PrintArray(nT, "Теоретические частоты");
+            //6. Найти критерий Пирсона
+            double X = MyMath.PearsonsCriterion(frequencies, nT);
+            Console.WriteLine("Критерий Пирсона: {0}", X);
+            //7. Проверка теории
+            double V = P.Length - 2; //K-(s+1) где s=1, K=P.Length
+            Console.WriteLine("Количество степеней свободы: {0}", V);
             double tabl = V + Math.Sqrt(2 * V) * (-2.33) + 2.0 / 3.0 * Math.Pow(-2.33, 2) - 2.0 / 3.0 + (1.0 / Math.Sqrt(V));
-            if (Xi > tabl) Console.WriteLine("Теория подтверждается");
-            else Console.WriteLine("Теория отвергается");
-            Console.WriteLine("Лямбда  " + lambda);
-            */
+            Console.WriteLine("Процентная точка распределения X^2: {0}", tabl);
+            if (X > tabl) Console.WriteLine("Теория подтверждена");
+            else Console.WriteLine("Теория отвергнута");
             Console.ReadKey();
-        }
-
-        static double GetDoubleMiddle(double a, double b)
-        {
-            return (a + b) / 2;
-        }
-
-
-        /// <summary>
-        /// Высчитывает количество элементов на интервале
-        /// </summary>
-        /// <param name="min"></param>
-        /// <param name="max"></param>
-        /// <param name="array"></param>
-        /// <returns></returns>
-        static int CalculateMatchingNumbers(double min, double max, int[] array)
-        {
-            int tmp = 0;  //Счетчик
-            //Перебор всех чисел
-            foreach (var a in array)
-            {
-                if (a >= min && a <= max) tmp++;
-            }
-            return tmp;
-        }
-
-        static int[] GetArrayOfAmountOfExperiments(int[] array, double[] intervali)
-        {
-            int[] exitArray = new int[intervali.Length - 1];
-            for (int i = 0; i < exitArray.Length; i++)
-            {
-                exitArray[i] = CalculateMatchingNumbers(intervali[i], intervali[i + 1], array);
-            }
-            return exitArray;
         }
     }
 }
