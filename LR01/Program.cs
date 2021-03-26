@@ -121,7 +121,7 @@ namespace LR01
                 int[] result = new int[array.Length];
                 result[0] = array[0];
                 for (int i = 1; i < array.Length; i++)
-                    result[i] += result[i - 1] + array[i];
+                    result[i] = result[i - 1] + array[i];
                 return result;
             }
             /// <summary>
@@ -239,6 +239,7 @@ namespace LR01
             //5. Теоретические частоты
             int[] nT = MyMath.MyArray.TheoreticalFrequencies(P, N);
             MyConsole.PrintArray(nT, "Теоретические частоты");
+            MyConsole.PrintChart(nT);
             //6. Найти критерий Пирсона
             double X = MyMath.PearsonsCriterion(frequencies, nT);
             Console.WriteLine("Критерий Пирсона: {0}", X);
